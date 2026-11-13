@@ -1,0 +1,7 @@
+# dsh-image-window bundle patch：把插件行插进 profile 的 Cordis 加载名单。
+# 阈值 keepSteps 在这里配（loader 条目 config，改完需完整重启 Desktop 生效）。
+- insert:
+    - id: dsh-image-window
+      name: dsh-image-window
+      config:
+        keepSteps: 2
