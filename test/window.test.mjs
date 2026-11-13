@@ -62,6 +62,30 @@ function makeCtx(config) {
   }
 }
 
+test('invalid keepSteps strings fall back to two steps', async () => {
+  for (const keepSteps of ['0.5', '2abc', '', ' ', true, null, Infinity, -1]) {
+    const session = makeSession([{ type: 'tool/result', images: 1 }, { type: 'assistant/message' }, { type: 'tool/result', images: 1 }])
+    await makeCtx({ keepSteps }).fire(PAYLOAD(session))
+    assert.equal(session.offloadCount, 0, String(keepSteps))
+  }
+})
+
+test('aborted sweep never enters downstream', async () => {
+  let handler, entered = 0
+  apply({ on(n, h) { handler = h } }, {})
+  const error = new Error('cancelled')
+  await assert.rejects(handler({ signal: { throwIfAborted() { throw error } } }, () => { entered++ }), e => e === error)
+  assert.equal(entered, 0)
+})
+
+test('synchronous downstream errors propagate exactly once', async () => {
+  let handler, entered = 0
+  apply({ on(n, h) { handler = h } }, {})
+  const error = new Error('downstream failed')
+  await assert.rejects(handler(PAYLOAD(makeSession([])), () => { entered++; throw error }), e => e === error)
+  assert.equal(entered, 1)
+})
+
 const PAYLOAD = (session) => ({
   agent: { session },
   messages: [],

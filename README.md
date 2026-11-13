@@ -23,7 +23,7 @@ DSH 图片滑动窗口：每个 agent 步骤的模型请求前，把**最近 N �
 从 surface 末端向前数，`assistant/message` 节点计一个"步骤"；位于最近 keepSteps 个步骤**之外**的 `user/message` / `tool/result` 节点里的图片块（且尚未 offloaded）全部进 targets，一次 append 一个事件。
 
 - keepSteps=2：只保留最后两轮动作的截图，更早的变占位符；
-- keepSteps=0：当前步之外的图全部立刻 offload（最激进）；
+- keepSteps=0：包括当前步和新输入的图全部立刻 offload（最激进）；
 - assistant 节点的图片永不选（投影校验 target 类型）；
 - 幂等：已 offloaded 的块跳过，无新目标不 append；compaction 换掉旧节点后自然看不到。
 
@@ -50,7 +50,7 @@ ode_modulesdsh-image-window" -Target "D:ilesDSHdsh-image-window"
 
 ## 验证
 
-- 跑单测：`node --test test/`（桩会话复刻 surface API，覆盖窗口选择/幂等/assistant 跳过/缺投影停摆）；
+- 跑单测：`npm test`（桩会话复刻 surface API，覆盖窗口选择/幂等/assistant 跳过/缺投影停摆）；
 - 实战：重启后开一个 computer-use 会话连点几步，会话日志里应出现 `image/offload` 事件；请求体里旧截图位置变成占位符文本（带路径）。
 
 ## 卸载
